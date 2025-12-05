@@ -18,7 +18,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     timer = Timer(const Duration(seconds: 3), () {
-      RouteHandler.navigateTo(RouteName.home);
+      RouteHandler.navigateTo(RouteName.login);
     });
   }
 

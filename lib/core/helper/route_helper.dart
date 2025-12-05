@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:magic_slide/core/helper/route_name.dart';
 import 'package:magic_slide/feature/home_page/home_screen.dart';
-
+import 'package:magic_slide/feature/login_signup/login_screen.dart';
+import 'package:magic_slide/feature/login_signup/signup_screen.dart';
 import 'package:magic_slide/presentation/splash_screen.dart';
 
 class RouteHelper {
@@ -15,6 +16,8 @@ class RouteHelper {
     routes: [
       GoRoute(path: RouteName.splash, builder: (context, state) => SplashScreen()),
       GoRoute(path: RouteName.home, builder: (context, state) => HomeScreen()),
+      GoRoute(path: RouteName.login, builder: (context, state) => LoginScreen()),
+      GoRoute(path: RouteName.signup, builder: (context, state) => SignUpScreen()),
     ],
   );
 }

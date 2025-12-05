@@ -36,6 +36,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   cached_network_image: ^3.4.1
   go_router: ^17.0.0
+  forui: ^0.16.0
+  forui_hooks: ^0.16.0
+  forui_assets: ^0.16.0
 
 dev_dependencies:
   flutter_test:
