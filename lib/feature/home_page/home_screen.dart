@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:magic_slide/core/helper/route_handler.dart';
-
 import 'package:magic_slide/core/helper/route_name.dart';
+import 'package:magic_slide/core/helper/theme_manager.dart';
+import 'package:magic_slide/feature/login_signup/data/auth_controller.dart';
 import 'data/api_service.dart';
 import 'domain/model/generate_input_model.dart';
 import 'domain/model/watermark_model.dart';
@@ -26,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _accessIdController = TextEditingController();
 
   final PresentationApiService _apiService = PresentationApiService();
+  final AuthController _authController = AuthController();
 
   final bool autoHide = true;
   bool aiImage = false;
@@ -39,6 +41,51 @@ class _HomeScreenState extends State<HomeScreen> {
   String selectedModel = 'gpt-4';
   String selectedPresentationFor = 'student';
   String selectedPosition = 'BottomRight';
+
+  Future<void> _handleLogout() async {
+    // Show confirmation dialog
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Logout')),
+        ],
+      ),
+    );
+
+    if (shouldLogout == true) {
+      try {
+        await _authController.signOut();
+        if (mounted) {
+          RouteHandler.navigateTo(RouteName.login);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error logging out: ${e.toString()}')));
+        }
+      }
+    }
+  }
+
+  void _toggleTheme() {
+    // Toggle between light and dark theme using ThemeManager
+    themeManager.toggleTheme();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(themeManager.isDarkMode ? 'Switched to dark mode' : 'Switched to light mode'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
 
   Future<void> _generatePresentation() async {
     // Validate inputs
@@ -162,6 +209,21 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Magic Slide'),
+        actions: [
+          // Theme toggle button
+          IconButton(
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.light ? Icons.dark_mode : Icons.light_mode,
+            ),
+            tooltip: 'Toggle theme',
+            onPressed: _toggleTheme,
+          ),
+          // Logout button
+          IconButton(icon: const Icon(Icons.logout), tooltip: 'Logout', onPressed: _handleLogout),
+        ],
+      ),
       body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 32),
         child: SingleChildScrollView(
