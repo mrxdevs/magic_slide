@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:magic_slide/core/helper/route_handler.dart';
+
+import 'package:magic_slide/core/helper/route_name.dart';
+import 'data/api_service.dart';
+import 'domain/model/generate_input_model.dart';
+import 'domain/model/watermark_model.dart';
 
 enum Mode { Default, Editable }
 
@@ -16,12 +22,143 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _widthController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _brandUrlController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _accessIdController = TextEditingController();
+
+  final PresentationApiService _apiService = PresentationApiService();
 
   final bool autoHide = true;
   bool aiImage = false;
   bool imageOnEachPage = false;
   bool googleImage = false;
   bool googleText = false;
+  bool _isLoading = false;
+
+  String selectedMode = 'Default';
+  String selectedLanguage = 'en';
+  String selectedModel = 'gpt-4';
+  String selectedPresentationFor = 'student';
+  String selectedPosition = 'BottomRight';
+
+  Future<void> _generatePresentation() async {
+    // Validate inputs
+    if (_controller.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter a topic')));
+      return;
+    }
+
+    if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter a valid email')));
+      return;
+    }
+
+    if (_accessIdController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter your access ID')));
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Create the watermark model
+      final watermark = WatermarkModel(
+        width: _widthController.text.isNotEmpty ? _widthController.text : '48',
+        height: _heightController.text.isNotEmpty ? _heightController.text : '48',
+        brandURL: _brandUrlController.text.isNotEmpty
+            ? _brandUrlController.text
+            : 'https://example.com/logo.png',
+        position: selectedPosition,
+      );
+
+      // Create the input model
+      final inputModel = GenerateInputModel(
+        topic: _controller.text,
+        extraInfoSource: 'Generated from Magic Slide App',
+        email: 'mrxamjad@gmail.com',
+        accessId: '123456789',
+        template: 'bullet-point1', // Default template
+        language: selectedLanguage,
+        slideCount: int.tryParse(_pageController.text) ?? 10,
+        aiImages: aiImage,
+        imageForEachSlide: imageOnEachPage,
+        googleImage: googleImage,
+        googleText: googleText,
+        model: selectedModel,
+        presentationFor: selectedPresentationFor,
+        watermark: watermark,
+      );
+
+      // Call the API
+      final response = await _apiService.generatePresentation(inputModel);
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (response.success && response.data != null) {
+        // Show success dialog with URL
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Success!'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(response.message),
+                  const SizedBox(height: 16),
+                  const Text('Presentation URL:'),
+                  const SizedBox(height: 8),
+                  SelectableText(
+                    response.data!.url,
+                    style: const TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Close'),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        // Show error message
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: ${response.message}')));
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('An error occurred: ${e.toString()}')));
+      }
+    }
+
+    RouteHandler.navigateTo(RouteName.pdfViewer);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,15 +203,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     Expanded(
                       child: FSelectMenuTile.fromMap(
-                        const {'English': 'English', 'Arabic': 'Arabic'},
-                        initialValue: 'English',
+                        const {'English': 'en', 'Arabic': 'ar'},
+                        initialValue: 'en',
                         autoHide: autoHide,
                         validator: (value) => value == null ? 'Select an item' : null,
 
                         title: const Text("Lan"),
                         detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
-                          'English' => 'English',
-                          'Arabic' => 'Arabic',
+                          'en' => 'English',
+                          'ar' => 'Arabic',
                           _ => 'None',
                         }),
                       ),
@@ -226,15 +363,62 @@ class _HomeScreenState extends State<HomeScreen> {
 
               SizedBox(
                 height: 64,
-                child: FTextField(
-                  controller: _brandUrlController,
-                  label: const Text('Position'),
-                  hint: 'Position',
-                  maxLines: 1,
+                child: Row(
+                  spacing: 20,
+                  children: [
+                    Expanded(
+                      child: FTextFormField(
+                        controller: _emailController,
+                        label: const Text('Email'),
+                        hint: 'your-email@example.com',
+                        maxLines: 1,
+                        validator: (value) => value != null && value.isNotEmpty
+                            ? value.contains('@')
+                                  ? null
+                                  : 'Not a valid email'
+                            : 'Email is required',
+                      ),
+                    ),
+                    Expanded(
+                      child: FTextFormField(
+                        controller: _accessIdController,
+                        label: const Text('Access ID'),
+                        hint: 'your-access-id',
+                        maxLines: 1,
+                        validator: (value) =>
+                            value == null || value.isEmpty ? 'Access ID is required' : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(
+                height: 48,
+                child: FSelectMenuTile.fromMap(
+                  const {
+                    'Top Right': 'TopRight',
+                    'Top Left': 'TopLeft',
+                    'Bottom Right': 'BottomRight',
+                    'Bottom Left': 'BottomLeft',
+                  },
+                  initialValue: 'BottomRight',
+                  autoHide: autoHide,
+                  validator: (value) => value == null ? 'Select a position' : null,
+                  title: const Text('Watermark Position'),
+                  detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
+                    'TopRight' => 'Top Right',
+                    'TopLeft' => 'Top Left',
+                    'BottomRight' => 'Bottom Right',
+                    'BottomLeft' => 'Bottom Left',
+                    _ => 'None',
+                  }),
                 ),
               ),
               const SizedBox(height: 32),
-              FButton(child: const Text('Generate'), onPress: () {}),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : FButton(onPress: _generatePresentation, child: const Text('Generate')),
               const SizedBox(height: 32),
             ],
           ),

@@ -3,6 +3,7 @@ import 'package:forui/forui.dart';
 
 import 'package:magic_slide/core/helper/route_handler.dart';
 import 'package:magic_slide/core/helper/route_name.dart';
+import 'data/auth_controller.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -16,6 +17,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  final AuthController _authController = AuthController();
+
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -26,7 +30,51 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSignUp() async {
+    // Validate form
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Sign up with Supabase
+      await _authController.signUp(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account created successfully! Please sign in.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Navigate to login screen
+        RouteHandler.navigateTo(RouteName.login);
+      }
+    } catch (e) {
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -55,8 +103,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
             const SizedBox(height: 10),
             FTextFormField.password(
-              label: Text("Confirm Password"),
-
+              label: const Text("Confirm Password"),
               hint: 'Confirm Password',
               controller: _confirmPasswordController,
               autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -64,19 +111,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   _passwordController.text == value ? null : 'Passwords do not match.',
             ),
             const SizedBox(height: 20),
-            FButton(
-              child: const Text('Sign Up'),
-              onPress: () {
-                if (!_formKey.currentState!.validate()) {
-                  RouteHandler.navigateTo(RouteName.home);
-                }
-              },
-            ),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : FButton(onPress: _handleSignUp, child: const Text('Sign Up')),
             const SizedBox(height: 15),
 
             FTappable(
               builder: (context, data, child) => Container(child: child!),
-              child: const Text('Already  have an account? Login'),
+              child: const Text('Already have an account? Login'),
               onPress: () {
                 RouteHandler.navigateTo(RouteName.login);
               },

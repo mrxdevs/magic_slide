@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:magic_slide/core/config/supabase_config.dart';
 import 'package:magic_slide/core/helper/route_helper.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Supabase
+  await SupabaseConfig.initialize();
+
   runApp(const MyApp());
 }
 
