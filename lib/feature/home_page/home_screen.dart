@@ -186,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text('Using Hardcoded Response')));
-            RouteHandler.navigateTo(
+            RouteHandler.navigateToNext(
               RouteName.pdfViewer,
               extra: "https://cdn.syncfusion.com/content/PDFViewer/flutter-succinctly.pdf",
             );
@@ -443,7 +443,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   }),
                 ),
               ),
-
+              const SizedBox(height: 12),
               _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : FButton(onPress: _generatePresentation, child: const Text('Generate')),

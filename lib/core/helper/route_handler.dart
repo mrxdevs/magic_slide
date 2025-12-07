@@ -1,10 +1,17 @@
 import 'package:magic_slide/core/helper/route_helper.dart';
+import 'package:magic_slide/core/helper/route_name.dart';
 
 class RouteHandler {
   //Navigate to
   static void navigateTo(String routeName, {Object? extra}) {
     checkNavigateState();
     RouteHelper.router.go(routeName, extra: extra);
+  }
+
+  //Navigate to next and pop
+  static void navigateToNext(String routeName, {Object? extra}) {
+    checkNavigateState();
+    RouteHelper.router.push(routeName, extra: extra);
   }
 
   //Navigate to and remove
@@ -16,7 +23,11 @@ class RouteHandler {
   //Pop
   static void pop() {
     checkNavigateState();
-    RouteHelper.router.pop();
+    if (RouteHelper.router.canPop()) {
+      RouteHelper.router.pop();
+    } else {
+      RouteHelper.router.go(RouteName.home);
+    }
   }
 
   //Validate navigator key
