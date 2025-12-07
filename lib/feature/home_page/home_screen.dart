@@ -231,12 +231,10 @@ class _HomeScreenState extends State<HomeScreen> {
             spacing: 20,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 48),
               FTextField(
                 controller: _controller,
                 label: const Text('Topic'),
                 hint: 'Enter your topic',
-                description: const Text('Please enter your topic.'),
                 minLines: 5,
                 maxLines: 10,
               ),
@@ -445,7 +443,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   }),
                 ),
               ),
-              const SizedBox(height: 32),
+
               _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : FButton(onPress: _generatePresentation, child: const Text('Generate')),
