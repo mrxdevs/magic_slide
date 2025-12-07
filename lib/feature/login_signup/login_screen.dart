@@ -68,55 +68,58 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: Container(
-      padding: const EdgeInsets.all(32),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FTextFormField.email(
-              controller: _emailController,
-              hint: 'janedoe@foruslabs.com',
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: (value) =>
-                  (value?.contains('@') ?? false) ? null : 'Please enter a valid email.',
-            ),
-            const SizedBox(height: 10),
-            FTextFormField.password(
-              controller: _passwordController,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: (value) =>
-                  8 <= (value?.length ?? 0) ? null : 'Password must be at least 8 characters long.',
-            ),
-            const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: FTappable(
-                builder: (context, data, child) => Container(child: child!),
-                child: const Text(
-                  'Forgot Password?',
-                  style: TextStyle(color: Colors.blue, fontSize: 14),
+    body: FScaffold(
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FTextFormField.email(
+                controller: _emailController,
+                hint: 'janedoe@foruslabs.com',
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (value) =>
+                    (value?.contains('@') ?? false) ? null : 'Please enter a valid email.',
+              ),
+              const SizedBox(height: 10),
+              FTextFormField.password(
+                controller: _passwordController,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: (value) => 8 <= (value?.length ?? 0)
+                    ? null
+                    : 'Password must be at least 8 characters long.',
+              ),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerRight,
+                child: FTappable(
+                  builder: (context, data, child) => Container(child: child!),
+                  child: const Text(
+                    'Forgot Password?',
+                    style: TextStyle(color: Colors.blue, fontSize: 14),
+                  ),
+                  onPress: () {
+                    RouteHandler.navigateTo(RouteName.forgotPassword);
+                  },
                 ),
+              ),
+              const SizedBox(height: 20),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : FButton(onPress: _handleLogin, child: const Text('Login')),
+              const SizedBox(height: 15),
+
+              FTappable(
+                builder: (context, data, child) => Container(child: child!),
+                child: const Text('New User? Sign Up'),
                 onPress: () {
-                  RouteHandler.navigateTo(RouteName.forgotPassword);
+                  RouteHandler.navigateTo(RouteName.signup);
                 },
               ),
-            ),
-            const SizedBox(height: 20),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : FButton(onPress: _handleLogin, child: const Text('Login')),
-            const SizedBox(height: 15),
-
-            FTappable(
-              builder: (context, data, child) => Container(child: child!),
-              child: const Text('New User? Sign Up'),
-              onPress: () {
-                RouteHandler.navigateTo(RouteName.signup);
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     ),
