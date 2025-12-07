@@ -1,6 +1,6 @@
-abstract class PdfDownloadModel {
+abstract class PdfDownloadResModel {
   final String? filePath;
   final String? message;
 
-  PdfDownloadModel({this.filePath, this.message});
+  PdfDownloadResModel({this.filePath, this.message});
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:forui/widgets/scaffold.dart';
-import 'package:forui/widgets/toast.dart';
 import 'package:magic_slide/core/helper/route_handler.dart';
 import 'package:magic_slide/feature/pdf_viewer/data/repository/pdf_download_service.dart';
 
@@ -33,9 +32,13 @@ class _PdfViewerScreenState extends State<PdfViewerScreen> {
               onPressed: () async {
                 await PdfDownloadService().downloadPdf(widget.pdfUrl).then((value) {
                   if (value.filePath != null) {
-                    showFToast(context: context, title: Text("Downloaded at ${value.filePath}"));
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Downloaded at ${value.filePath}')));
                   } else {
-                    showFToast(context: context, title: Text("Failed to download"));
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Failed to download')));
                   }
                 });
               },
