@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:magic_slide/core/constants/dir.dart';
+import 'package:magic_slide/core/constants/user_info.dart';
 import 'package:magic_slide/core/helper/pref_services.dart';
 import 'package:magic_slide/core/helper/route_handler.dart';
 import 'package:magic_slide/core/helper/route_name.dart';
@@ -19,8 +20,10 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      timer = Timer(const Duration(seconds: 3), () async {
+      timer = Timer(const Duration(seconds: 2), () async {
         final isLoggedIn = await PrefServices.instance.isLoggedIn();
+        UserInfo.email = await PrefServices.instance.getUserEmail() ?? '';
+        UserInfo.uid = await PrefServices.instance.getUserUid() ?? '';
 
         if (isLoggedIn) {
           RouteHandler.navigateTo(RouteName.home);

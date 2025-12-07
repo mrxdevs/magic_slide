@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:magic_slide/core/constants/user_info.dart';
 import 'package:magic_slide/core/helper/route_handler.dart';
 import 'package:magic_slide/core/helper/route_name.dart';
 import 'package:magic_slide/core/helper/theme_manager.dart';
@@ -23,8 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _widthController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _brandUrlController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _accessIdController = TextEditingController();
 
   final PresentationApiService _apiService = PresentationApiService();
   final AuthController _authController = AuthController();
@@ -96,20 +95,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter a valid email')));
-      return;
-    }
-
-    if (_accessIdController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter your access ID')));
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
@@ -129,9 +114,9 @@ class _HomeScreenState extends State<HomeScreen> {
       final inputModel = GenerateInputModel(
         topic: _controller.text,
         extraInfoSource: 'Generated from Magic Slide App',
-        email: 'mrxamjad@gmail.com',
-        accessId: '123456789',
-        template: 'bullet-point1', // Default template
+        email: UserInfo.email,
+        accessId: 'SinceIDontHaveOne',
+        template: 'bullet-point1', // Default template also can add more templates from Dropdown
         language: selectedLanguage,
         slideCount: int.tryParse(_pageController.text) ?? 10,
         aiImages: aiImage,
@@ -420,38 +405,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? null
                             : 'Not a valid url'
                       : null,
-                ),
-              ),
-
-              SizedBox(
-                height: 64,
-                child: Row(
-                  spacing: 20,
-                  children: [
-                    Expanded(
-                      child: FTextFormField(
-                        controller: _emailController,
-                        label: const Text('Email'),
-                        hint: 'your-email@example.com',
-                        maxLines: 1,
-                        validator: (value) => value != null && value.isNotEmpty
-                            ? value.contains('@')
-                                  ? null
-                                  : 'Not a valid email'
-                            : 'Email is required',
-                      ),
-                    ),
-                    Expanded(
-                      child: FTextFormField(
-                        controller: _accessIdController,
-                        label: const Text('Access ID'),
-                        hint: 'your-access-id',
-                        maxLines: 1,
-                        validator: (value) =>
-                            value == null || value.isEmpty ? 'Access ID is required' : null,
-                      ),
-                    ),
-                  ],
                 ),
               ),
 

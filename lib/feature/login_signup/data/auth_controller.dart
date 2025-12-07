@@ -1,4 +1,5 @@
 import 'package:magic_slide/core/config/supabase_config.dart';
+
 import 'package:magic_slide/core/helper/pref_services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -25,7 +26,11 @@ class AuthController {
   Future<Session?> signIn({required String email, required String password}) async {
     try {
       final response = await _supabase.auth.signInWithPassword(email: email, password: password);
+
       await PrefServices.instance.setIsLoggedIn(true);
+
+      await PrefServices.instance.setUserEmail(response.user!.email ?? '');
+      await PrefServices.instance.setUserUid(response.user!.id);
       return response.session;
     } on AuthException catch (e) {
       throw _handleAuthException(e);
@@ -38,6 +43,8 @@ class AuthController {
   Future<void> signOut() async {
     try {
       await PrefServices.instance.setIsLoggedIn(false);
+      await PrefServices.instance.setUserEmail('');
+      await PrefServices.instance.setUserUid('');
       await _supabase.auth.signOut();
     } catch (e) {
       throw 'Failed to sign out';
