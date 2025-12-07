@@ -2,15 +2,15 @@ import 'package:magic_slide/core/helper/route_helper.dart';
 
 class RouteHandler {
   //Navigate to
-  static void navigateTo(String routeName) {
+  static void navigateTo(String routeName, {Object? extra}) {
     checkNavigateState();
-    RouteHelper.router.go(routeName);
+    RouteHelper.router.go(routeName, extra: extra);
   }
 
   //Navigate to and remove
-  static void navigateToAndRemove(String routeName) {
+  static void navigateToAndRemove(String routeName, {Object? extra}) {
     checkNavigateState();
-    RouteHelper.router.go(routeName);
+    RouteHelper.router.go(routeName, extra: extra);
   }
 
   //Pop

@@ -23,7 +23,10 @@ class RouteHelper {
         path: RouteName.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
-      GoRoute(path: RouteName.pdfViewer, builder: (context, state) => PdfViewerScreen()),
+      GoRoute(
+        path: RouteName.pdfViewer,
+        builder: (context, state) => PdfViewerScreen(pdfUrl: state.extra as String),
+      ),
     ],
   );
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+
 import 'package:magic_slide/core/constants/user_info.dart';
 import 'package:magic_slide/core/helper/route_handler.dart';
 import 'package:magic_slide/core/helper/route_name.dart';
@@ -171,9 +172,25 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         // Show error message
         if (context.mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: ${response.message}')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${response.message}'),
+              duration: const Duration(milliseconds: 500),
+            ),
+          );
+
+          debugPrint(response.message.toString().toLowerCase());
+
+          if (response.message.toString().toLowerCase().contains("something is missing.")) {
+            //This is a hardcoded response for now since the API is not working as it is not ready with API key
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Using Hardcoded Response')));
+            RouteHandler.navigateTo(
+              RouteName.pdfViewer,
+              extra: "https://cdn.syncfusion.com/content/PDFViewer/flutter-succinctly.pdf",
+            );
+          }
         }
       }
     } catch (e) {
@@ -187,8 +204,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ).showSnackBar(SnackBar(content: Text('An error occurred: ${e.toString()}')));
       }
     }
-
-    RouteHandler.navigateTo(RouteName.pdfViewer);
   }
 
   @override
