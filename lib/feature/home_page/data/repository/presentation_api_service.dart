@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../domain/model/generate_input_model.dart';
-import '../domain/model/generate_response_model.dart';
+import 'package:magic_slide/feature/home_page/domain/repository/presentation_api.dart';
+import '../model/generate_input_model.dart';
+import '../model/generate_response_model.dart';
 
-class PresentationApiService {
+class PresentationApiService implements PresentationApi {
   static const String baseUrl = 'https://api.magicslides.app';
   static const String generateEndpoint = '/public/api/ppt_from_topic';
 
+  @override
   Future<GenerateResponseModel> generatePresentation(GenerateInputModel input) async {
     try {
       final url = Uri.parse('$baseUrl$generateEndpoint');

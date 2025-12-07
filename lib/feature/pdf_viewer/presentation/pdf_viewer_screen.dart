@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:forui/widgets/scaffold.dart';
+import 'package:forui/widgets/toast.dart';
 import 'package:magic_slide/core/helper/route_handler.dart';
+import 'package:magic_slide/feature/pdf_viewer/data/repository/pdf_download_service.dart';
 
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 //Using this URL as hardcoded response for now
@@ -16,15 +19,31 @@ class PdfViewerScreen extends StatefulWidget {
 class _PdfViewerScreenState extends State<PdfViewerScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('PDF Viewer'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => RouteHandler.pop(),
+    return FScaffold(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('PDF Viewer'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => RouteHandler.pop(),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.download),
+              onPressed: () async {
+                await PdfDownloadService().downloadPdf(widget.pdfUrl).then((value) {
+                  if (value.filePath != null) {
+                    showFToast(context: context, title: Text("Downloaded at ${value.filePath}"));
+                  } else {
+                    showFToast(context: context, title: Text("Failed to download"));
+                  }
+                });
+              },
+            ),
+          ],
         ),
+        body: Center(child: SfPdfViewer.network(widget.pdfUrl)),
       ),
-      body: Center(child: SfPdfViewer.network(widget.pdfUrl)),
     );
   }
 }

@@ -6,9 +6,9 @@ import 'package:magic_slide/core/helper/route_handler.dart';
 import 'package:magic_slide/core/helper/route_name.dart';
 import 'package:magic_slide/core/helper/theme_manager.dart';
 import 'package:magic_slide/feature/login_signup/data/auth_controller.dart';
-import 'data/api_service.dart';
-import 'domain/model/generate_input_model.dart';
-import 'domain/model/watermark_model.dart';
+import 'data/repository/presentation_api_service.dart';
+import 'data/model/generate_input_model.dart';
+import 'data/model/watermark_model.dart';
 
 enum Mode { Default, Editable }
 
@@ -208,247 +208,261 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Magic Slide'),
-        actions: [
-          // Theme toggle button
-          IconButton(
-            icon: Icon(
-              Theme.of(context).brightness == Brightness.light ? Icons.dark_mode : Icons.light_mode,
+    return FAnimatedTheme(
+      data: themeManager.isDarkMode ? FThemes.zinc.dark : FThemes.zinc.light,
+
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Magic Slide'),
+          actions: [
+            // Theme toggle button
+            IconButton(
+              icon: Icon(
+                Theme.of(context).brightness == Brightness.light
+                    ? Icons.dark_mode
+                    : Icons.light_mode,
+              ),
+              tooltip: 'Toggle theme',
+              onPressed: _toggleTheme,
             ),
-            tooltip: 'Toggle theme',
-            onPressed: _toggleTheme,
-          ),
-          // Logout button
-          IconButton(icon: const Icon(Icons.logout), tooltip: 'Logout', onPressed: _handleLogout),
-        ],
-      ),
-      body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: SingleChildScrollView(
-          child: Column(
-            spacing: 20,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FTextField(
-                controller: _controller,
-                label: const Text('Topic'),
-                hint: 'Enter your topic',
-                minLines: 5,
-                maxLines: 10,
-              ),
-
-              SizedBox(
-                height: 48,
-
-                child: Row(
-                  spacing: 12,
-                  children: [
-                    Expanded(
-                      child: FSelectMenuTile.fromMap(
-                        const {'Default': Mode.Default, 'Editable': Mode.Editable},
-                        initialValue: Mode.Default,
-                        autoHide: autoHide,
-                        validator: (value) => value == null ? 'Select an item' : null,
-
-                        title: const Text('Mode'),
-                        detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
-                          Mode.Default => 'Default',
-                          Mode.Editable => 'Editable',
-                          _ => 'None',
-                        }),
-                      ),
-                    ),
-
-                    Expanded(
-                      child: FSelectMenuTile.fromMap(
-                        const {'English': 'en', 'Arabic': 'ar'},
-                        initialValue: 'en',
-                        autoHide: autoHide,
-                        validator: (value) => value == null ? 'Select an item' : null,
-
-                        title: const Text("Lan"),
-                        detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
-                          'en' => 'English',
-                          'ar' => 'Arabic',
-                          _ => 'None',
-                        }),
-                      ),
-                    ),
-                  ],
+            // Logout button
+            IconButton(icon: const Icon(Icons.logout), tooltip: 'Logout', onPressed: _handleLogout),
+          ],
+        ),
+        body: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: SingleChildScrollView(
+            child: Column(
+              spacing: 20,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FTextField(
+                  controller: _controller,
+                  label: const Text('Topic'),
+                  hint: 'Enter your topic',
+                  minLines: 5,
+                  maxLines: 10,
                 ),
-              ),
 
-              Column(
-                children: [
-                  Row(
+                SizedBox(
+                  height: 48,
+
+                  child: Row(
+                    spacing: 12,
                     children: [
                       Expanded(
-                        child: FSwitch(
-                          label: const Text('AI Image'),
-                          semanticsLabel: 'AI Image',
-                          value: aiImage,
-                          onChange: (value) => setState(() => aiImage = value),
+                        child: FSelectMenuTile.fromMap(
+                          const {'Default': Mode.Default, 'Editable': Mode.Editable},
+                          initialValue: Mode.Default,
+                          autoHide: autoHide,
+                          validator: (value) => value == null ? 'Select an item' : null,
+
+                          title: const Text('Mode'),
+                          detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
+                            Mode.Default => 'Default',
+                            Mode.Editable => 'Editable',
+                            _ => 'None',
+                          }),
                         ),
                       ),
+
                       Expanded(
-                        child: FSwitch(
-                          label: const Text('Image on Each Page'),
-                          semanticsLabel: 'Image on Each Page',
-                          value: imageOnEachPage,
-                          onChange: (value) => setState(() => imageOnEachPage = value),
+                        child: FSelectMenuTile.fromMap(
+                          const {'English': 'en', 'Arabic': 'ar'},
+                          initialValue: 'en',
+                          autoHide: autoHide,
+                          validator: (value) => value == null ? 'Select an item' : null,
+
+                          title: const Text("Lan"),
+                          detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
+                            'en' => 'English',
+                            'ar' => 'Arabic',
+                            _ => 'None',
+                          }),
                         ),
                       ),
                     ],
                   ),
-                  Row(
+                ),
+
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FSwitch(
+                            label: const Text('AI Image'),
+                            semanticsLabel: 'AI Image',
+                            value: aiImage,
+                            onChange: (value) => setState(() => aiImage = value),
+                          ),
+                        ),
+                        Expanded(
+                          child: FSwitch(
+                            label: const Text('Image on Each Page'),
+                            semanticsLabel: 'Image on Each Page',
+                            value: imageOnEachPage,
+                            onChange: (value) => setState(() => imageOnEachPage = value),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FSwitch(
+                            label: const Text('Google Image'),
+                            semanticsLabel: 'Google Image',
+                            value: googleImage,
+                            onChange: (value) => setState(() => googleImage = value),
+                          ),
+                        ),
+                        Expanded(
+                          child: FSwitch(
+                            label: const Text('Google Text'),
+                            semanticsLabel: 'Google Text',
+                            value: googleText,
+                            onChange: (value) => setState(() => googleText = value),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                SizedBox(
+                  height: 48,
+                  child: Row(
+                    spacing: 12,
                     children: [
                       Expanded(
-                        child: FSwitch(
-                          label: const Text('Google Image'),
-                          semanticsLabel: 'Google Image',
-                          value: googleImage,
-                          onChange: (value) => setState(() => googleImage = value),
+                        child: FSelectMenuTile.fromMap(
+                          const {
+                            'gpt-4': 'gpt-4',
+                            'gpt-4o': 'gpt-4o',
+                            'gpt-4o-mini': 'gpt-4o-mini',
+                          },
+                          initialValue: 'gpt-4',
+                          autoHide: autoHide,
+                          validator: (value) => value == null ? 'Select an item' : null,
+
+                          title: const Text('Model'),
+                          detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
+                            'gpt-4' => 'gpt-4',
+                            'gpt-4o' => 'gpt-4o',
+                            'gpt-4o-mini' => 'gpt-4o-mini',
+
+                            _ => 'None',
+                          }),
                         ),
                       ),
                       Expanded(
-                        child: FSwitch(
-                          label: const Text('Google Text'),
-                          semanticsLabel: 'Google Text',
-                          value: googleText,
-                          onChange: (value) => setState(() => googleText = value),
+                        child: FSelectMenuTile.fromMap(
+                          const {
+                            'student': 'student',
+                            'teacher': 'teacher',
+                            'business': 'business',
+                          },
+                          initialValue: 'student',
+                          autoHide: autoHide,
+                          validator: (value) => value == null ? 'Select an item' : null,
+
+                          title: const Text('User'),
+                          detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
+                            'student' => 'student',
+                            'teacher' => 'teacher',
+                            'business' => 'business',
+
+                            _ => 'None',
+                          }),
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-
-              SizedBox(
-                height: 48,
-                child: Row(
-                  spacing: 12,
-                  children: [
-                    Expanded(
-                      child: FSelectMenuTile.fromMap(
-                        const {'gpt-4': 'gpt-4', 'gpt-4o': 'gpt-4o', 'gpt-4o-mini': 'gpt-4o-mini'},
-                        initialValue: 'gpt-4',
-                        autoHide: autoHide,
-                        validator: (value) => value == null ? 'Select an item' : null,
-
-                        title: const Text('Model'),
-                        detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
-                          'gpt-4' => 'gpt-4',
-                          'gpt-4o' => 'gpt-4o',
-                          'gpt-4o-mini' => 'gpt-4o-mini',
-
-                          _ => 'None',
-                        }),
-                      ),
-                    ),
-                    Expanded(
-                      child: FSelectMenuTile.fromMap(
-                        const {'student': 'student', 'teacher': 'teacher', 'business': 'business'},
-                        initialValue: 'student',
-                        autoHide: autoHide,
-                        validator: (value) => value == null ? 'Select an item' : null,
-
-                        title: const Text('User'),
-                        detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
-                          'student' => 'student',
-                          'teacher' => 'teacher',
-                          'business' => 'business',
-
-                          _ => 'None',
-                        }),
-                      ),
-                    ),
-                  ],
                 ),
-              ),
 
-              SizedBox(
-                height: 64,
-                child: Row(
-                  spacing: 20,
-                  children: [
-                    Expanded(
-                      child: FTextFormField(
-                        controller: _pageController,
-                        label: const Text('Page'),
-                        hint: '10',
-                        keyboardType: TextInputType.number,
+                SizedBox(
+                  height: 64,
+                  child: Row(
+                    spacing: 20,
+                    children: [
+                      Expanded(
+                        child: FTextFormField(
+                          controller: _pageController,
+                          label: const Text('Page'),
+                          hint: '10',
+                          keyboardType: TextInputType.number,
 
-                        maxLines: 1,
+                          maxLines: 1,
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: FTextFormField(
-                        controller: _widthController,
-                        label: const Text('Width'),
-                        hint: '10',
-                        maxLines: 1,
-                        keyboardType: TextInputType.number,
+                      Expanded(
+                        child: FTextFormField(
+                          controller: _widthController,
+                          label: const Text('Width'),
+                          hint: '10',
+                          maxLines: 1,
+                          keyboardType: TextInputType.number,
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: FTextFormField(
-                        controller: _heightController,
-                        label: const Text('Height'),
-                        hint: '10',
-                        keyboardType: TextInputType.number,
-                        maxLines: 1,
+                      Expanded(
+                        child: FTextFormField(
+                          controller: _heightController,
+                          label: const Text('Height'),
+                          hint: '10',
+                          keyboardType: TextInputType.number,
+                          maxLines: 1,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
-              SizedBox(
-                height: 64,
-                child: FTextFormField(
-                  controller: _brandUrlController,
-                  label: const Text('Brand Url'),
-                  hint: 'https://example.com',
+                SizedBox(
+                  height: 64,
+                  child: FTextFormField(
+                    controller: _brandUrlController,
+                    label: const Text('Brand Url'),
+                    hint: 'https://example.com',
 
-                  maxLines: 1,
-                  validator: (value) => value != null && value.isNotEmpty
-                      ? Uri.parse(value).host.contains('http')
-                            ? null
-                            : 'Not a valid url'
-                      : null,
+                    maxLines: 1,
+                    validator: (value) => value != null && value.isNotEmpty
+                        ? Uri.parse(value).host.contains('http')
+                              ? null
+                              : 'Not a valid url'
+                        : null,
+                  ),
                 ),
-              ),
 
-              SizedBox(
-                height: 48,
-                child: FSelectMenuTile.fromMap(
-                  const {
-                    'Top Right': 'TopRight',
-                    'Top Left': 'TopLeft',
-                    'Bottom Right': 'BottomRight',
-                    'Bottom Left': 'BottomLeft',
-                  },
-                  initialValue: 'BottomRight',
-                  autoHide: autoHide,
-                  validator: (value) => value == null ? 'Select a position' : null,
-                  title: const Text('Watermark Position'),
-                  detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
-                    'TopRight' => 'Top Right',
-                    'TopLeft' => 'Top Left',
-                    'BottomRight' => 'Bottom Right',
-                    'BottomLeft' => 'Bottom Left',
-                    _ => 'None',
-                  }),
+                SizedBox(
+                  height: 48,
+                  child: FSelectMenuTile.fromMap(
+                    const {
+                      'Top Right': 'TopRight',
+                      'Top Left': 'TopLeft',
+                      'Bottom Right': 'BottomRight',
+                      'Bottom Left': 'BottomLeft',
+                    },
+                    initialValue: 'BottomRight',
+                    autoHide: autoHide,
+                    validator: (value) => value == null ? 'Select a position' : null,
+                    title: const Text('Watermark Position'),
+                    detailsBuilder: (_, values, _) => Text(switch (values.firstOrNull) {
+                      'TopRight' => 'Top Right',
+                      'TopLeft' => 'Top Left',
+                      'BottomRight' => 'Bottom Right',
+                      'BottomLeft' => 'Bottom Left',
+                      _ => 'None',
+                    }),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : FButton(onPress: _generatePresentation, child: const Text('Generate')),
-              const SizedBox(height: 32),
-            ],
+                const SizedBox(height: 12),
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : FButton(onPress: _generatePresentation, child: const Text('Generate')),
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),
