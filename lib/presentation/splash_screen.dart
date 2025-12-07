@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:magic_slide/core/constants/dir.dart';
+import 'package:magic_slide/core/helper/pref_services.dart';
 import 'package:magic_slide/core/helper/route_handler.dart';
 import 'package:magic_slide/core/helper/route_name.dart';
 
@@ -17,8 +18,16 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    timer = Timer(const Duration(seconds: 3), () {
-      RouteHandler.navigateTo(RouteName.login);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      timer = Timer(const Duration(seconds: 3), () async {
+        final isLoggedIn = await PrefServices.instance.isLoggedIn();
+
+        if (isLoggedIn) {
+          RouteHandler.navigateTo(RouteName.home);
+        } else {
+          RouteHandler.navigateTo(RouteName.login);
+        }
+      });
     });
   }
 

@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
           routerConfig: RouteHelper.router,
           theme: theme.toApproximateMaterialTheme(),
           darkTheme: FThemes.zinc.dark.toApproximateMaterialTheme(),
+
           themeMode: themeManager.themeMode,
         );
       },

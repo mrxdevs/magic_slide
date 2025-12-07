@@ -4,7 +4,6 @@ import '../domain/model/generate_input_model.dart';
 import '../domain/model/generate_response_model.dart';
 
 class PresentationApiService {
-  // TODO: Replace with your actual API endpoint
   static const String baseUrl = 'https://api.magicslides.app';
   static const String generateEndpoint = '/public/api/ppt_from_topic';
 
